@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+# William Killian
+# University of Delaware
+#
+# Contact: killian@udel.edu
+#
+# 2014 February 18
+#
+# permutation generator
+#
+# Usage:
+#   invoke `permute -h`
+#
+# Outputs:
+#   permutation of passed arguments
+#   
+
+function show_help {
+    echo 'permute -d N -g M C P'
+    echo '  -d N : specifies delimeter for items'
+    echo '  -g M : specifies delimeter for groups'
+    echo '  C    : number of possible values'
+    echo '  P    : number of trials'
+    echo ''
+    echo ' Created by William Killian'
+    exit 0
+}
+
+OPTIND=1
+# Reset in case getopts has been used previously in the shell.
+
+# Initialize our own variables:
+g_set=0
+i_set=0
+
+while getopts "d:g:h" opt; do
+    case "$opt" in
+	h)
+            show_help
+            ;;
+	d)  i_delim=$OPTARG
+	    i_set=1
+	    ;;
+	g)  g_delim=$OPTARG
+	    g_set=1
+	    ;;
+    esac
+done
+
+export g_delim
+export i_delim
+
+shift $((OPTIND-1))
+
+[ "$1" = "--" ] && shift
+
+[ "$#" -lt 2 ] && show_help
+[ $((g_set + i_set)) -ne 2 ] && show_help
+
+lit="$(seq -s, $1)"
+str_lit="{$(seq -s, -f .%0.0f $1)}"
+for i in $(seq 2 $2)
+do
+    a="{$lit}$str_lit"
+    lit=$(eval "echo $a" | sed "s/ /,/g")
+done
+lit=$(echo $lit | sed "s/[{}]//g;s/,/$g_delim/g;s/[.]/$i_delim/g")
+echo $lit
+
+exit 0
+

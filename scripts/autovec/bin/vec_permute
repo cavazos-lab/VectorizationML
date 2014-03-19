@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+# William Killian
+# University of Delaware
+#
+# Contact: killian@udel.edu
+#
+# 2014 February 18
+#
+# Auto-tuning vectorization code generator
+#
+# Usage:
+#   vec_permute /filename/
+#
+# Outputs:
+#   new versions of /filename/ in same directory
+#   
+
+# labels for file naming
+declare -a plabels
+plabels=( "VL2"
+    "VL4"
+    "VL8"
+    "VA"
+    "IV"
+    "N")
+
+# file is the only argument
+file=$1
+
+# determine number of loops from file
+permute_count=$(grep -c '#pragma autovec permute' $file)
+# number of unique options
+permute_vals=${#plabels[@]}
+
+# get unique permutations
+result=$(permute -d ',' -g ' ' $permute_vals $permute_count)
+
+for i in $result
+do
+    # build new file name
+    extension=${file#*.}
+    newfile="$file"
+    IFS_BAK=$IFS
+    IFS=','
+    for j in $i
+    do
+	newfile+="_${plabels[$((j - 1))]}"
+    done
+    newfile+=".$extension"
+    IFS=$IFS_BAK
+    # generate new file
+    permute_program -v d=',' -v str=${i} $file > $newfile
+done

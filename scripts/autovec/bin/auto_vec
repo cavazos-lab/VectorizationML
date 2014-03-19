@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# William Killian
+# University of Delaware
+#
+# Contact: killian@udel.edu
+#
+# 2014 February 18
+#
+# Auto-tuning vectorization code generator
+#
+# Usage:
+#   auto_vec /filename/+
+#
+# Outputs:
+#   new versions of /filename/ in same directory
+#   more than one filename may be included as arguments
+
+for var in "$@"
+do
+    vec_permute ${var}
+done

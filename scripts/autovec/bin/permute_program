@@ -1,0 +1,53 @@
+#!/usr/bin/env awk -f
+
+# William Killian
+# University of Delaware
+#
+# Contact: killian@udel.edu
+#
+# 2014 February 18
+#
+# Auto-tuning vectorization code generator
+#
+# Usage:
+#   do not call directly
+#
+# Outputs:
+#   generates new version of program
+#   
+
+
+BEGIN {
+    # directive replacements; matches plabels in vec_permute
+    pragmas[1]="#pragma simd vectorlength(2)"
+    pragmas[2]="#pragma simd vectorlength(4)"
+    pragmas[3]="#pragma simd vectorlength(8)"
+    pragmas[4]="#pragma vector always"
+    pragmas[5]="#pragma ivdep"
+    pragmas[6]="#pragma autovec none"
+    
+    # place permute indicies in /vars/
+    split (str, vars, d)
+    i=0
+}
+/#pragma\sautovec\spermute/{
+    # simple replacement
+    gsub (/#pragma autovec permute/, pragmas[vars[i+1]])
+    i++
+}
+/#pragma\sautovec\svl.*/{
+    gsub (/autovec vl/, "simd vectorlength")
+}
+/#pragma\sautovec\salways.*/{
+    gsub (/autovec/, "vector")
+}
+/#pragma\sautovec\sivdep.*/{
+    gsub (/autovec\s/, "")
+}
+/#pragma\sautovec\snone/{
+    gsub (/#pragma\sautovec\snone/, "")
+}
+/.*/{
+    # default print out every line
+    print
+}
