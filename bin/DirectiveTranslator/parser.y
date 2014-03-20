@@ -97,10 +97,8 @@ depoption: IGNORE { myOptions.ignoreDep = true; }
 | DEFAULT { myOptions.ignoreDep = false; }
 ;
 
-lengthclause: VECTORSIZE LPAREN NUMBER RPAREN
+lengthclause: VECTORSIZE LPAREN number_or_error RPAREN
 { myOptions.vsize = $3; }
-| VECTORSIZE LPAREN error RPAREN
-{ myOptions.vsize = ERROR_VALUE; }
 ;
 
 loopclause: LOOP LPAREN looplist RPAREN
@@ -114,13 +112,13 @@ looplist: loopitem
 ;
 
 loopitem: UNROLL { myOptions.loop.unroll = 0; myOptions.loop.jam = DEFAULT_VALUE; }
-| UNROLL LPAREN loopvalue RPAREN { myOptions.loop.unroll = $3; myOptions.loop.jam = DEFAULT_VALUE; }
+| UNROLL LPAREN number_or_error RPAREN { myOptions.loop.unroll = $3; myOptions.loop.jam = DEFAULT_VALUE; }
 | JAM { myOptions.loop.jam = 0; myOptions.loop.unroll = DEFAULT_VALUE; }
-| JAM LPAREN loopvalue RPAREN { myOptions.loop.jam = $3; myOptions.loop.unroll = DEFAULT_VALUE; }
+| JAM LPAREN number_or_error RPAREN { myOptions.loop.jam = $3; myOptions.loop.unroll = DEFAULT_VALUE; }
 | DISTRIBUTE { myOptions.loop.dist = true; }
 | NOFUSION { myOptions.loop.nofusion = true; }
 ;
 
-loopvalue: NUMBER { $$ = $1; }
+number_or_error: NUMBER { $$ = $1; }
 | error { $$ = ERROR_VALUE; }
 ;
