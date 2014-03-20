@@ -1,0 +1,1 @@
+#pragma VALT vector(none) loop(unroll(4), distribute)
