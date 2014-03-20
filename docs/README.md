@@ -129,3 +129,20 @@ $UnrollOptionType := NONE
 
 $UnrollOptionValue := W
 ```
+
+Directive Parsing
+=================
+
+All directives are parsed left-to-right with any later option overriding a previously set option
+
+Examples
+--------
+
+1. `#pragma <name> vector(none) loop(unroll(4), distribute)`
+   Results in no vectorization but will unroll by a factor of and split if necessary
+2. `#pragma <name> vector(always,temp) vectorsize(8) loop(nofusion)`
+   Results in vectorization with temporal stores and a vector size of 8. Loop is never fused.
+3. `#pragma <name> vector(always) depend(ignore) loop(jam)`
+   Results in vectorization with no dependence checking (ignores). Loop is unrolled and jammed.
+4. `pragma <name> vector(aligned) vectorsize(4) depend(default) loop(jam (8), nofusion, distribute)`
+   Results in aligned vectorization code with a vector size of 4. Dependencies are used to determine vectorization. Loop is jammed and unrolled by a factor of 8 with no fusion. Loop will be split if necessary.
