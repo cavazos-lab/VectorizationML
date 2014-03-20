@@ -22,9 +22,9 @@ int yycolumn = 1;
 "none"       yylval=0; return NONE;
 "default"    yylval=-1; return DEFAULT;
 "vectorsize" return VECTORSIZE;
-"vector"     return VECTORSTATEMENT;
-"depend"     return DEPENDSTATEMENT;
-"loop"       return LOOPSTATEMENT;
+"vector"     return VECTOR;
+"depend"     return DEPEND;
+"loop"       return LOOP;
 "always"     return ALWAYS;
 "aligned"    return ALIGNED;
 "unaligned"  return UNALIGNED;
@@ -38,6 +38,6 @@ int yycolumn = 1;
 [ \t]+       /* do nothing */
 \n           yycolumn = 1; ++yylineno; /* newlines are cool */
 \\\n         yycolumn = 1; ++yylineno; /* escaped newlines are cool, too */
-.            /* do nothing */
+.            return JUNK;
 %%
 

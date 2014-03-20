@@ -37,6 +37,7 @@ options_t {
 } options_t;
 
 extern const int DEFAULT_VALUE;
+extern const int ERROR_VALUE;
 
 options_t
 DEFAULT_OPTIONS ();

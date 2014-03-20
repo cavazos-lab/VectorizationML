@@ -1,6 +1,7 @@
 #include "pragma_information.h"
 
 const int DEFAULT_VALUE = -1;
+const int ERROR_VALUE = -2;
 
 options_t
 DEFAULT_OPTIONS () {

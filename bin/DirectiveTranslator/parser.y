@@ -48,15 +48,20 @@
 %locations
 %start directive
 
-%token DIRECTIVE_CODE LPAREN RPAREN COMMA NUMBER PRAGMA NONE DEFAULT VECTORSTATEMENT DEPENDSTATEMENT LOOPSTATEMENT VECTORSIZE ALWAYS ALIGNED UNALIGNED NONTEMP TEMP IGNORE DISTRIBUTE NOFUSION UNROLL JAM
+%token DIRECTIVE_CODE LPAREN RPAREN COMMA NUMBER PRAGMA NONE DEFAULT VECTOR DEPEND LOOP VECTORSIZE ALWAYS ALIGNED UNALIGNED NONTEMP TEMP IGNORE DISTRIBUTE NOFUSION UNROLL JAM JUNK
 
 %%
 
-directive : PRAGMA DIRECTIVE_CODE clause clauselist
+directive : PRAGMA DIRECTIVE_CODE clauselist
+| PRAGMA error clauselist
+| PRAGMA error error
+| PRAGMA DIRECTIVE_CODE error
 ;
 
 clauselist : clause clauselist
+| error clauselist
 | clause COMMA clauselist
+| error COMMA clauselist
 | /* */
 ;
 
@@ -66,12 +71,15 @@ clause : vectorclause
 | loopclause
 ;
 
-vectorclause: VECTORSTATEMENT LPAREN vectorlist RPAREN
+vectorclause: VECTOR LPAREN vectorlist RPAREN
+| VECTOR LPAREN error RPAREN
 ;
 
 vectorlist: NONE { myOptions.vector.novector = true; }
 | vectoritem
 | vectoritem COMMA vectorlist
+| error
+| error COMMA vectorlist
 ;
 
 vectoritem: ALWAYS { myOptions.vector.always = true; }
@@ -81,7 +89,8 @@ vectoritem: ALWAYS { myOptions.vector.always = true; }
 | TEMP  { myOptions.vector.temp_value = TEMP_; }
 ;
 
-depclause: DEPENDSTATEMENT LPAREN depoption RPAREN
+depclause: DEPEND LPAREN depoption RPAREN
+| DEPEND LPAREN error RPAREN
 ;
 
 depoption: IGNORE { myOptions.ignoreDep = true; }
@@ -90,19 +99,28 @@ depoption: IGNORE { myOptions.ignoreDep = true; }
 
 lengthclause: VECTORSIZE LPAREN NUMBER RPAREN
 { myOptions.vsize = $3; }
+| VECTORSIZE LPAREN error RPAREN
+{ myOptions.vsize = ERROR_VALUE; }
 ;
 
-loopclause: LOOPSTATEMENT LPAREN looplist RPAREN
+loopclause: LOOP LPAREN looplist RPAREN
+| LOOP LPAREN error RPAREN
 ;
 
 looplist: loopitem
 | loopitem COMMA looplist
+| error
+| loopitem COMMA error
 ;
 
 loopitem: UNROLL { myOptions.loop.unroll = 0; myOptions.loop.jam = DEFAULT_VALUE; }
-| UNROLL LPAREN NUMBER RPAREN { myOptions.loop.unroll = $3; myOptions.loop.jam = DEFAULT_VALUE; }
+| UNROLL LPAREN loopvalue RPAREN { myOptions.loop.unroll = $3; myOptions.loop.jam = DEFAULT_VALUE; }
 | JAM { myOptions.loop.jam = 0; myOptions.loop.unroll = DEFAULT_VALUE; }
-| JAM LPAREN NUMBER RPAREN { myOptions.loop.jam = $3; myOptions.loop.unroll = DEFAULT_VALUE; }
+| JAM LPAREN loopvalue RPAREN { myOptions.loop.jam = $3; myOptions.loop.unroll = DEFAULT_VALUE; }
 | DISTRIBUTE { myOptions.loop.dist = true; }
 | NOFUSION { myOptions.loop.nofusion = true; }
+;
+
+loopvalue: NUMBER { $$ = $1; }
+| error { $$ = ERROR_VALUE; }
 ;

@@ -32,7 +32,7 @@ print_options (FILE* out, options_t* options)
     {
       fprintf (out, "#pragma ivdep\n");
     }
-    if (options->vsize != DEFAULT_VALUE)
+    if (options->vsize != DEFAULT_VALUE && options->vsize != ERROR_VALUE)
     {
       int x = options->vsize;
       assert (!(x & (x - 1)) && x); // ensures power of 2
@@ -43,14 +43,14 @@ print_options (FILE* out, options_t* options)
   {
     fprintf (out, "#pragma novector\n");
   }
-  if (options->loop.jam != DEFAULT_VALUE)
+  if (options->loop.jam != DEFAULT_VALUE && options->vsize != ERROR_VALUE)
   {
     if (options->loop.jam > 0)
       fprintf (out, "#pragma unroll_and_jam(%d)\n", options->loop.jam);
     else
       fprintf (out, "#pragma unroll_and_jam\n");
   }
-  else if (options->loop.unroll != DEFAULT_VALUE)
+  else if (options->loop.unroll != DEFAULT_VALUE && options->loop.unroll != ERROR_VALUE)
   {
     if (options->loop.unroll > 0)
       fprintf (out, "#pragma unroll(%d)\n", options->loop.unroll);
