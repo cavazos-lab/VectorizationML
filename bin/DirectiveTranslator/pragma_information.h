@@ -36,10 +36,27 @@ options_t {
   l_options_t loop;
 } options_t;
 
-extern const int DEFAULT_VALUE;
-extern const int ERROR_VALUE;
+#define DEFAULT_VALUE (-1)
 
-options_t
-DEFAULT_OPTIONS ();
+#define ERROR_VALUE (-2)
 
+#ifdef __cplusplus
+extern "C" {
 #endif
+  
+options_t default_options ();
+
+options_t* default_options_ptr ();
+
+options_t* merge_options (options_t*, options_t*);
+
+options_t* merge_options_free (options_t*, options_t*);
+
+char* print_options (options_t*);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+  
+#endif
+

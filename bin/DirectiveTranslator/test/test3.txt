@@ -1,1 +1,0 @@
-#pragma VALT vector(aligned,temp) vectorsize(4) depend(ignore) loop(nofusion,distribute,unroll(4))

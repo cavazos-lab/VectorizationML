@@ -1,16 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pragma_information.h"
-#include "option_printer.h"
-
 
 extern FILE* yyin;
 extern int yyparse();
-extern options_t myOptions;
+extern char* output;
 
 int main(int ac, char** av)
 {
-  myOptions = DEFAULT_OPTIONS();
   if (ac > 2)
   {
     fprintf (stderr, "Only one file may be read at a time!\n");
@@ -34,5 +31,5 @@ int main(int ac, char** av)
   while (!feof (yyin));
   fclose (yyin);
 
-  print_options (stdout, &myOptions);
+  fprintf (stdout, "%s\n", output);
 }
