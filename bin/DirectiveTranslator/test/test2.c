@@ -17,7 +17,7 @@ int main() {
        distribute)
   for (i = 0; i < 100; ++i)
   {
-#pragma VALT loop(unroll(junk), distribute)
+#pragma VALT loop(unroll(loop), distribute)
     for (j = 0; j < 100; ++j)
     {
       a [j] = 0;

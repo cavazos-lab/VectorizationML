@@ -5,7 +5,7 @@
 
 #include "pragma_information.h"
 
-#define CHECK(def,first,second,key)             \
+#define CHECK(res,first,second,key)             \
   {                                             \
     if (res -> key == second -> key)            \
       res -> key = first -> key;                \
