@@ -1,4 +1,13 @@
 #include <common.h>
+
+int s151s(float a[LEN], float b[LEN],  int m)
+{
+	for (int i = 0; i < LEN-1; i++) {
+		a[i] = a[i + m] + b[i];
+	}
+	return 0;
+}
+
 int s151()
 {
 
@@ -18,14 +27,6 @@ int s151()
 	clock_dif_sec = (double) (clock_dif/1000000.0);
 	printf("S151\t %.2f \t\t", clock_dif_sec);;
 	check(1);
-	return 0;
-}
-
-int s151s(float a[LEN], float b[LEN],  int m)
-{
-	for (int i = 0; i < LEN-1; i++) {
-		a[i] = a[i + m] + b[i];
-	}
 	return 0;
 }
 

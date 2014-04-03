@@ -34,8 +34,8 @@ int main(){
 	set(ip, &s1, &s2);
 	printf("Loop \t Time(Sec) \t Checksum \n");
 
-	call();
-    s235();
+	init();
+  s235();
 }
 
 void set(int* ip, float* s1, float* s2){

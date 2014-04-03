@@ -1,5 +1,9 @@
 #include <common.h>
 
+inline float f(float a, float b){
+	return a*b;
+}
+
 int s4121()
 {
 

@@ -36,7 +36,7 @@ int main(){
 	set(ip, &s1, &s2);
 	printf("Loop \t Time(Sec) \t Checksum \n");
 
-	init()
+	init();
     s4114(ip,n1);
 }
 
