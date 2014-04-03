@@ -41,7 +41,7 @@ int main(){
 	printf("Loop \t Time(Sec) \t Checksum \n");
 
 	init();
-    s1111();
+    s2111();
 }
 
 void set(int* ip, float* s1, float* s2){

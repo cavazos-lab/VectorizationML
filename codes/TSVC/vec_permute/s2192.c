@@ -1,6 +1,6 @@
 #include <common.h>
 
-int s2102()
+int s2192()
 {
 
 //	diagonals

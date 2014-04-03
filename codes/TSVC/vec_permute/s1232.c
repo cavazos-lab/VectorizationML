@@ -66,8 +66,8 @@ void set(int* ip, float* s1, float* s2){
 	*s1 = 1.0;
 	*s2 = 2.0;
     
-    set2d(aa, one,unit);
-    set2d(bb,zero,unit);
+    set2d(aa, 1.,1);
+    set2d(bb,0.,1);
 }
 
 int init()

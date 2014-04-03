@@ -1,5 +1,11 @@
 #include <common.h>
 
+int s152s(float a[LEN], float b[LEN], float c[LEN], int i)
+{
+	a[i] += b[i] * c[i];
+	return 0;
+}
+
 int s152()
 {
 
@@ -25,11 +31,7 @@ int s152()
 	return 0;
 }
 
-int s152s(float a[LEN], float b[LEN], float c[LEN], int i)
-{
-	a[i] += b[i] * c[i];
-	return 0;
-}
+
 int main(){
 	int n1 = 1;
 	int n3 = 1;
