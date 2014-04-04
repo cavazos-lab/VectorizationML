@@ -1,40 +1,46 @@
 #!/usr/bin/env bash
+
+GENDIR=gen
+LOGDIR=log
+EXECDIR=exec
+
 echo "Generating"
-for i in *.c
+for src in *.c
 do
-  dir=gen/$(basename $i .c)
+  dir=$GENDIR/$(basename $src .c)
   mkdir -p $dir
-  cp $i $dir
+  cp $src $dir
   cd $dir
-  echo "> $i"
-  auto_vec $i
-  rm $i
+  echo "> $src"
+  auto_vec $src
+  rm $src
   cd ../..
 done
 
 echo "Compiling"
-icc -std=c99 -O3 -xHOST common/dummy.c -c -o gen/dummy.o
-for i in $(find ./gen -name "*.c")
+icc -std=c99 -O3 -xHOST common/dummy.c -c -o $GENDIR/dummy.o
+for file in $(find $GENDIR -name "*.c")
 do
-  o=$(echo $i | sed 's/gen/exe/;s/c$/o/;s/\.c_/_/')
-  log=$(echo $o | sed 's/o$/log/')
-  dir=$(dirname $o)
+  obj=$(echo $file | sed "s/$GENDIR/$EXECDIR/;s/c$/o/;s/\.c_/_/")
+  log=$(echo $obj | sed "s/o$/log/")
+  dir=$(dirname $obj)
   mkdir -p $dir
-  echo "icc -std=c99 -O3 -xHOST -Icommon/ -c $i -o $o -vecreport6"
-  icc -std=c99 -O3 -xHOST -Icommon/ -c $i -o $o -vec-report6 > $log
+  echo "icc -std=c99 -O3 -xHOST -Icommon/ -c $file -o $obj -vecreport6"
+  (icc -std=c99 -O3 -xHOST -Icommon/ -c $file -o $obj -vec-report6 2>&1) > $log
 done
 
-for o in $(find ./exe -name "*.o")
+for obj in $(find exec -name "*.o")
 do
-  echo "Linking $o"
-  icc -std=c99 -O3 -xHOST $o common/dummy.o -o $(echo $o | sed 's/.o$/exe/')
-  rm $o
+  echo "Linking $obj"
+  bin=$(echo $obj | sed 's/o$/exe/')
+  icc -std=c99 -O3 -xHOST $obj common/dummy.o -o $bin
 done
 
 echo "Running"
-for o in $(find ./exe -name "*.exe")
+for exe in $(find exec -executable -not -type d)
 do
-  dir=$(dirname $o)
+  dir=$(dirname $exe)
   outfile=$dir/run.log
-  $o >> outfile
+  echo "$exe"
+  ./$exe >> $outfile
 done
