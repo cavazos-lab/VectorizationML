@@ -73,12 +73,46 @@ function run {
 
 function output {
     mkdir -p $OUTDIR
+    args="$@"
+    pattern="Time(Sec)"
     for i in $1*.c
     do
-	benchmark=$(echo $i | sed 's/\.c//')
+	benchmark=$(basename $i .c)
 	echo "[c] $OUTDIR/$benchmark.out"
-	./parseimpl.sh < $TIMEDIR/$benchmark.log > $OUTDIR/$benchmark.out
+	parsing=0
+	(
+	    while read -r line
+            do
+		echo $line 1>&2
+		if ! [[ $line = *$pattern* ]] # ignore lines with /pattern/
+		then
+		    if [[ -n "$line" ]] # check if line is not empty
+		    then
+			if [[ $parsing -eq 0 ]] # if we haven't read benchmark, read it!
+			then
+			    bench=$(echo $line | sed 's/[^_]*_\(.*\)/\1/;s/\.*exe//')
+			    parsing=1
+			else
+			    set -- $line
+			    if [[ -z "$3" ]] # we actually read the next benchmark; store it
+			    then
+				bench=$(echo $line | sed 's/[^_]*_\(.*\)/\1/;s/\.*exe//')
+				parsing=1
+				time=0
+				chksum="NaN"
+			    else # set time and checksum
+				parsing=0
+				time=$2
+				chksum=$3
+			    fi
+			    echo "$bench,$time,$chksum"
+			fi
+		    fi
+		fi
+	    done < $TIMEDIR/$benchmark.log
+	) | sort -n -k2 -t, > $OUTDIR/$benchmark.out
     done
+    set -- "$args"
 }
 
 function csv {
