@@ -64,7 +64,7 @@ function run {
 	    tmpfile=$(mktemp)
 	    echo "./$exe"
 	    echo "$exe" > $tmpfile
-	    ./$exe >> $tmpfile
+	    ./$exe 2> /dev/null >> $tmpfile
 	    cat $tmpfile >> $outfile
 	    rm $tmpfile
 	done
@@ -83,7 +83,6 @@ function output {
 	(
 	    while read -r line
             do
-		echo $line 1>&2
 		if ! [[ $line = *$pattern* ]] # ignore lines with /pattern/
 		then
 		    if [[ -n "$line" ]] # check if line is not empty
@@ -131,7 +130,8 @@ function csv {
 	    bench=$(echo "$line" | cut -d, -f1)
 	    time=$(echo "$line" | cut -d, -f2)
 	    checksum=$(echo "$line" | cut -d, -f3)
-	    
+	    time=$(echo $time | bc -l)
+	    echo $time 1>&2
 	    if [[ -z "$time" || "$time" = "0" ]]
 	    then
 		speedup=0
@@ -153,7 +153,6 @@ function img {
     mkdir -p $IMGDIR
     for file in $CSVDIR/$1*.csv
     do
-	echo "$file"
 	title=$(basename $file .csv)
 	size=$(echo "$(< $file wc -l)/5 + 1" | bc)
 	out=$IMGDIR/$title.eps
