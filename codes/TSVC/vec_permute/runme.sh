@@ -22,7 +22,7 @@ function generate {
 	mkdir -p $dir
 	cp $src $dir
 	pushd $dir > /dev/null
-	echo "Generating $src"
+	echo "[c] $src variants"
 	auto_vec $src
 	rm $src
 	popd > /dev/null
@@ -30,7 +30,7 @@ function generate {
 }
 
 function compile {
-    $COMP $COMPFLAGS common/dummy.c -c -o $GENDIR/dummy.o
+    $COMP $COMPFLAGS common/dummy.c -c -o $EXECDIR/dummy.o
     for file in $(find $GENDIR -name "*$1*.c")
     do
 	obj=$(echo $file | sed "s/$GENDIR/$EXECDIR/;s/c$/o/;s/\.c_/_/")
@@ -39,7 +39,7 @@ function compile {
 	logdir=$(dirname $log)
 	mkdir -p $dir
 	mkdir -p $logdir
-	echo "Compiling $file"
+	echo "$file -> $obj"
 	($COMP $COMPFLAGS -c $file -o $obj 2>&1) > $log
     done
 }
@@ -47,9 +47,9 @@ function compile {
 function link {
     for obj in $(find $EXECDIR -name "*$1*.o")
     do
-	echo "Linking $obj"
+	echo "$obj -> $exe"
 	bin=$(echo $obj | sed 's/o$/exe/')
-	$COMP $COMPFLAGS $obj common/dummy.o -o $bin
+	$COMP $COMPFLAGS $obj $EXECDIR/dummy.o -o $bin
     done
 }
 
@@ -62,7 +62,7 @@ function run {
 	for exe in $(find $dir -executable -not -type d)
 	do
 	    tmpfile=$(mktemp)
-	    echo "Running $exe"
+	    echo "./$exe"
 	    echo "$exe" > $tmpfile
 	    ./$exe >> $tmpfile
 	    cat $tmpfile >> $outfile
@@ -73,12 +73,10 @@ function run {
 
 function output {
     mkdir -p $OUTDIR
-    pattern="Time(Sec)"
-    match=$(echo "*$1*.c" | sed 's/\*+/s/')
-    for i in $match
+    for i in $1*.c
     do
 	benchmark=$(echo $i | sed 's/\.c//')
-	echo "Generating $OUTDIR/$benchmark.out"
+	echo "[c] $OUTDIR/$benchmark.out"
 	./parseimpl.sh < $TIMEDIR/$benchmark.log > $OUTDIR/$benchmark.out
     done
 }
@@ -92,7 +90,7 @@ function csv {
 	def_checksum=$(echo "$line" | cut -d, -f3)
 	
 	outfile=$(echo "$out" | sed "s/$OUTDIR/$CSVDIR/;s/out$/csv/")
-	echo "Writing $out -> $outfile"
+	echo "$out -> $outfile"
 	
 	(for line in $(cat $out)
         do
@@ -100,7 +98,12 @@ function csv {
 	    time=$(echo "$line" | cut -d, -f2)
 	    checksum=$(echo "$line" | cut -d, -f3)
 	    
-	    speedup=$(echo "$def_time / $time" | bc -l)
+	    if [[ -z "$time" || "$time" = "0" ]]
+	    then
+		speedup=0
+	    else
+		speedup=$(echo "$def_time / $time" | bc -l)
+	    fi
 	    
 	    if [[ "$def_checksum" = "$checksum" ]]
 	    then
@@ -114,20 +117,20 @@ function csv {
 
 function img {
     mkdir -p $IMGDIR
-    for file in $CSVDIR/*$1*.csv
+    for file in $CSVDIR/$1*.csv
     do
+	echo "$file"
 	title=$(basename $file .csv)
 	size=$(echo "$(< $file wc -l)/5 + 1" | bc)
 	out=$IMGDIR/$title.eps
-        echo "Generating $out"
+        echo "$file -> $out"
 	gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$size'" generate.gnuplot
     done
-    
 }
 
 function summary {
     file=summary.csv
-    (for f in $CSVDIR/*$1*.csv
+    (for f in $CSVDIR/$1*.csv
     do
 	echo "$(echo $f | sed 's/csv\///;s/.csv$//'),$(head -n 1 $f | cut -d, -f2-3)"
     done) > $file
@@ -140,7 +143,7 @@ function summary {
 }
 
 function pdf {
-    for f in $IMGDIR/*$1*.eps
+    for f in $IMGDIR/$1*.eps
     do
 	echo "Parsing $f -> PDF"
 	GS_OPTIONS=-dAutoRotatePages=/None epstopdf $f
@@ -162,8 +165,8 @@ function show_help {
     echo " -o -- generate output files"
     echo " -v -- csv"
     echo " -i -- image (speedup graph)"
-    echo " -s -- generate summary speedup csv and graph"
     echo " -p -- generate pdf"
+    echo " -s -- generate summary speedup csv and graph"
     echo ""
     echo "final (optional) argument is a wildcard for matching"
     echo ""
@@ -175,8 +178,8 @@ RUN=0
 OUT=0
 CSV=0
 IMG=0
-SUM=0
 PDF=0
+SUM=0
 HELP=0
 args=$(getopt "agcrovisp" "$@")
 eval set -- "$args"
@@ -227,49 +230,40 @@ while [ $# -ge 1 ]; do
     shift
 done
 
-if [[ $GEN -ne 0 ]]
-then
+if [[ $GEN -ne 0 ]]; then
     generate $1
 fi
 
-if [[ $COM -ne 0 ]]
-then
+if [[ $COM -ne 0 ]]; then
     compile $1
     link $1
 fi
 
-if [[ $RUN -ne 0 ]]
-then
+if [[ $RUN -ne 0 ]]; then
     run $1
 fi
 
-if [[ $OUT -ne 0 ]]
-then
+if [[ $OUT -ne 0 ]]; then
     output $1
 fi
 
-if [[ $CSV -ne 0 ]]
-then
+if [[ $CSV -ne 0 ]]; then
     csv $1
 fi
 
-if [[ $IMG -ne 0 ]]
-then
+if [[ $IMG -ne 0 ]]; then
     img $1
 fi
 
-if [[ $SUM -ne 0 ]]
-then
-    summary $1
-fi
-
-if [[ $PDF -ne 0 ]]
-then
+if [[ $PDF -ne 0 ]]; then
     pdf $1
 fi
 
-if [[ $GEN -eq 0 && $PDF -eq 0 && $IMG -eq 0 && $COM -eq 0 && $RUN -eq 0 && $OUT -eq 0  && $CSV -eq 0  && $SUM -eq 0 || $HELP -ne 0 ]]
-then
+if [[ $SUM -ne 0 ]]; then
+    summary $1
+fi
+
+if [[ $GEN -eq 0 && $PDF -eq 0 && $IMG -eq 0 && $COM -eq 0 && $RUN -eq 0 && $OUT -eq 0  && $CSV -eq 0  && $SUM -eq 0 || $HELP -ne 0 ]]; then
     show_help
 fi
 
