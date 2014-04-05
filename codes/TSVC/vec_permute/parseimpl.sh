@@ -18,12 +18,14 @@ parsing=0
 		then
 		    bench=$(echo $line | sed 's/[^_]*_\(.*\)/\1/;s/\.*exe//')
 		    parsing=1
+		    time=0
+		    chksum="NaN"
 		else # set time and checksum
 		    parsing=0
+		    time=$2
+		    chksum=$3
 		fi
 		# print
-		time=$2
-		chksum=$3
 		echo "$bench,$time,$chksum"
 	    fi
 	fi
