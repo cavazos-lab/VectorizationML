@@ -3,8 +3,10 @@
 GENDIR=gen
 EXECDIR=exec
 CSVDIR=csv
+LOGDIR=logs
 OUTDIR=res
 IMGDIR=img
+TIMEDIR=timing
 
 COMP=icc
 COMPFLAGS=-"std=c99 -O3 -xHOST -vec-report6 -Icommon/"
@@ -28,9 +30,11 @@ function compile {
     for file in $(find $GENDIR -name "*$1*.c")
     do
 	obj=$(echo $file | sed "s/$GENDIR/$EXECDIR/;s/c$/o/;s/\.c_/_/")
-	log=$(echo $obj | sed "s/o$/log/")
+	log=$(echo $obj | sed "s/$EXECDIR/$LOGDIR/;s/o$/log/")
 	dir=$(dirname $obj)
+	logdir=$(dirname $log)
 	mkdir -p $dir
+	mkdir -p $logdir
 	echo "Compiling $file"
 	($COMP $COMPFLAGS -c $file -o $obj 2>&1) > $log
     done
@@ -46,16 +50,20 @@ function link {
 }
 
 function run {
-    for exe in $(find exec -executable -not -type d -name "*$1*exe")
+    mkdir -p $TIMEDIR
+    for dir in $(find exec -executable -type d -name "*$1*")
     do
-	dir=$(dirname $exe)
-	tmpfile=$(mktemp)
-	outfile=$dir/run.log
-	echo "Running $exe"
-	echo "$exe" > $tmpfile
-	./$exe >> $tmpfile
-	cat $tmpfile >> $outfile
-	rm $tmpfile
+	outfile=$TIMEDIR/$(basename $dir).log
+	rm -f $outfile
+	for exe in $(find $dir -executable -not -type d)
+	do
+	    tmpfile=$(mktemp)
+	    echo "Running $exe"
+	    echo "$exe" > $tmpfile
+	    ./$exe >> $tmpfile
+	    cat $tmpfile >> $outfile
+	    rm $tmpfile
+	done
     done
 }
 
@@ -67,7 +75,7 @@ function output {
     do
 	benchmark=$(echo $i | sed 's/\.c//')
 	echo "Generating $OUTDIR/$benchmark.out"
-	./parseimpl.sh < exec/$benchmark/run.log > $OUTDIR/$benchmark.out
+	./parseimpl.sh < $TIMEDIR/$benchmark.log > $OUTDIR/$benchmark.out
     done
 }
 
