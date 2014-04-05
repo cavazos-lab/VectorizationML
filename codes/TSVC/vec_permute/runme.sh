@@ -131,7 +131,6 @@ function csv {
 	    time=$(echo "$line" | cut -d, -f2)
 	    checksum=$(echo "$line" | cut -d, -f3)
 	    time=$(echo $time | bc -l)
-	    echo $time 1>&2
 	    if [[ -z "$time" || "$time" = "0" ]]
 	    then
 		speedup=0
@@ -145,7 +144,7 @@ function csv {
 	    else
 		echo "$bench,$speedup,0"
 	    fi
-	done) | sort -k3 -t, -s -r > $outfile
+	done) | sort -n -k3 -t, -s -r > $outfile
     done
 }
 
@@ -154,7 +153,7 @@ function img {
     for file in $CSVDIR/$1*.csv
     do
 	title=$(basename $file .csv)
-	size=$(echo "$(< $file wc -l)/5 + 1" | bc)
+	size=$(echo "$(< $file wc -l)/6 + 1" | bc)
 	out=$IMGDIR/$title.eps
         echo "$file -> $out"
 	gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$size'" generate.gnuplot
@@ -163,10 +162,29 @@ function img {
 
 function summary {
     file=summary.csv
-    (for f in $CSVDIR/$1*.csv
-    do
-	echo "$(echo $f | sed 's/csv\///;s/.csv$//'),$(head -n 1 $f | cut -d, -f2-3)"
-    done) > $file
+    form="1"
+    count=0
+    (
+	for f in $CSVDIR/$1*.csv
+	do
+	    echo "$(echo $f | sed 's/csv\///;s/.csv$//'),$(head -n 1 $f | cut -d, -f2-3)"
+	done
+    ) > $file
+    count=$(< $file wc -l)
+
+    #tmp=$(mktemp)
+    #sort -n -s -r -t, -k2 $file > $tmp
+    #mv $tmp $file
+    
+    form=$(cut -d, -f2 $file | paste -sd '+')
+    echo "A-MEAN,$(echo "($form)/$count" | bc -l),0" >> $file
+
+    form=$(echo "$form" | sed 's/+/*/g')
+    echo "G-MEAN,$(echo "e(l($form)/$count)" | bc -l),0" >> $file
+
+    form=$(echo "$form" | sed 's/*/+/g;s/\([0-9]\{1,\}\(\.[0-9]*\)\)/1\/(\1\)/g')
+    echo "H-MEAN,$(echo "$count/($form)" | bc -l),0" >> $file
+
     out=summary.eps
     title="Summary"
     size=$(echo "$(< $file wc -l)/10 + 1" | bc)
