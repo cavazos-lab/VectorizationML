@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+OLDPATH=$PATH
+PATH=$PATH:/Users/wkillian/Research/Repositories/VectorizationML/scripts/autovec/bin
+export PATH
+
 GENDIR=gen
 EXECDIR=exec
 CSVDIR=csv
@@ -21,7 +25,7 @@ function generate {
 	echo "Generating $src"
 	auto_vec $src
 	rm $src
-	popd
+	popd > /dev/null
     done
 }
 
@@ -269,3 +273,6 @@ then
     show_help
 fi
 
+
+PATH=$OLDPATH
+export PATH
