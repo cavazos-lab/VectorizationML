@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+nums=$@
+
+file=$(mktemp)
+
+(list=""
+for val in $nums
+do
+    v=$(seq -s, $val)
+    v="_$(echo $v | sed 's/,/,_/g')"
+    if [[ $val -gt 1 ]]; then
+	v="{$v}"
+    fi
+    if [[ -n "$list" ]]; then
+	list="{$list}"
+    fi
+    list=$(eval "echo $list$v" | sed "s/ /,/g")
+done
+echo $list | sed 's/_/ /g;s/,/\n/g;s/[\{\}]//g' | sed 's/^[[:space:]]*//g') > $file
+(
+    numArr=($nums)
+    count=${#numArr[@]}
+    while read line
+    do
+	valArr=($line)
+	for (( i = 0 ; i < $count ; i++ )); do
+	    for (( j = 1 ; j <= ${numArr[$i]} ; j++ )); do
+		if [[ $j == ${valArr[$i]} ]]; then
+		    echo -n "0,"
+		else
+		    echo -n "6,"
+		fi
+	    done
+	done
+	echo ""
+    done
+) < $file | sed 's/,$//g'
+
+rm $file

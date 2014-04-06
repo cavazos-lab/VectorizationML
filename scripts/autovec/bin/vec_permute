@@ -27,28 +27,70 @@ plabels=( "VL2"
 
 # file is the only argument
 file=$1
+shift
+rest="$@"
 
-# determine number of loops from file
-permute_count=$(grep -c '#pragma autovec permute' $file)
-# number of unique options
-permute_vals=${#plabels[@]}
-
-# get unique permutations
-result=$(permute -d ',' -g ' ' $permute_vals $permute_count)
-
-for i in $result
-do
-    # build new file name
-    extension=${file#*.}
-    newfile="$file"
-    IFS_BAK=$IFS
-    IFS=','
-    for j in $i
+if [[ -z "$rest" ]]; then
+    # determine number of loops from file
+    permute_count=$(grep -c '#pragma autovec permute' $file)
+    # number of unique options
+    permute_vals=${#plabels[@]}
+    
+    # get unique permutations
+    result=$(permute -d ',' -g ' ' $permute_vals $permute_count)
+    
+    for i in $result
     do
-	newfile+="_${plabels[$((j - 1))]}"
+	# build new file name
+	extension=${file#*.}
+	newfile=$file
+	IFS_BAK=$IFS
+	IFS=','
+	for j in $i
+	do
+	    newfile+="_${plabels[$((j - 1))]}"
+	done
+	newfile+=".$extension"
+	IFS=$IFS_BAK
+	# generate new file
+	permute_program -v d=',' -v str=${i} $file > $newfile
     done
-    newfile+=".$extension"
-    IFS=$IFS_BAK
-    # generate new file
-    permute_program -v d=',' -v str=${i} $file > $newfile
-done
+else
+
+    count=$(echo $rest | wc -w)
+    tmp=$(mktemp)
+    filter $rest > $tmp
+
+    result=$(permute -d ',' -g ' ' ${#plabels[@]} $count)
+    (
+	while read line
+	do
+	    for i in $result
+	    do
+		newline=$line
+
+		extension=${file#*.}
+		IFS_BAK=$IFS
+		IFS=','
+		newfile=$file
+		
+		for j in $i
+		do
+		    newline=$(echo $newline | sed "s/0/$j/")
+		done
+		for i in $newline
+		do
+		    newfile+="_${plabels[$((j - 1))]}"
+		done
+		newfile+="$extension"
+		IFS=$IFS_BAK
+		if [[ ! -f $newfile ]]
+		then
+		    permute_program -v d=',' -v str=${newline} $file > $newfile
+		fi
+	    done
+	done
+    ) < $tmp
+    
+    rm $tmp
+fi
