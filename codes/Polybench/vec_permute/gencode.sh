@@ -1,12 +1,12 @@
-
 file=$(mktemp)
 cat <<EOF > $file
 gesummv 2
 trisolv 2
 trmm 3
 gemm 3
-seidel-2d 4
+symm 3
 floyd-warshall 3
+seidel-2d 4
 bicg 1 2
 jacobi-1d-imper 2 1
 fdtd-apml 3 1
@@ -30,23 +30,26 @@ ludcmp 5 2 2
 reg_detect 4 3 2
 EOF
 
-# for i in $(cat $file)
-# do
-#     ./runme.sh -g $i
-# done
+for i in $(cat $file);do
+     ./runme.sh -g $i
+done
 
-for i in $(cat $file)
-do
+for i in $(cat $file);do
     ./runme.sh -c $i
 done
 
-for i in $(cat $file)
-do
+for i in $(cat $file);do
     ./runme.sh -rovi $i
 done
 
-rm $file
+# long runs
+cat <<EOF > $file
+correlation 2 2 2 3
+adi 3 2 2 2  
+EOF
 
-# long runs :c
-./runme.sh -gcrovi correlation 2 2 2 3 
-./runme.sh -gcrovi adi 3 1 2 2 2 
+for i in $(cat $file);do
+    ./runme.sh -gcrovi $i
+done
+
+rm $file
