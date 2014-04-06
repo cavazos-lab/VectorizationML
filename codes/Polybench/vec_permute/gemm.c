@@ -78,10 +78,10 @@ void kernel_gemm(int ni, int nj, int nk,
 #pragma autovec permute
     for (j = 0; j < _PB_NJ; j++)
       {
-	C[i][j] *= beta;
+        C[i][j] *= beta;
 #pragma autovec permute
-	for (k = 0; k < _PB_NK; ++k)
-	  C[i][j] += alpha * A[i][k] * B[k][j];
+        for (k = 0; k < _PB_NK; ++k)
+          C[i][j] += alpha * A[i][k] * B[k][j];
       }
 }
 

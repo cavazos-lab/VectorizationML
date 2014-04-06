@@ -63,9 +63,9 @@ void kernel_floyd_warshall(int n,
 #pragma autovec permute
       for(i = 0; i < _PB_N; i++)
 #pragma autovec permute
-	for (j = 0; j < _PB_N; j++)
-	  path[i][j] = path[i][j] < path[i][k] + path[k][j] ?
-	    path[i][j] : path[i][k] + path[k][j];
+        for (j = 0; j < _PB_N; j++)
+          path[i][j] = path[i][j] < path[i][k] + path[k][j] ?
+            path[i][j] : path[i][k] + path[k][j];
     }
 }
 

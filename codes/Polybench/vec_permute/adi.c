@@ -21,19 +21,19 @@
 /* Array initialization. */
 static
 void init_array (int n,
-		 DATA_TYPE POLYBENCH_2D(X,N,N,n,n),
-		 DATA_TYPE POLYBENCH_2D(A,N,N,n,n),
-		 DATA_TYPE POLYBENCH_2D(B,N,N,n,n))
+                 DATA_TYPE POLYBENCH_2D(X,N,N,n,n),
+                 DATA_TYPE POLYBENCH_2D(A,N,N,n,n),
+                 DATA_TYPE POLYBENCH_2D(B,N,N,n,n))
 {
   int i, j;
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
-      {
-	X[i][j] = ((DATA_TYPE) i*(j+1) + 1) / n;
-	A[i][j] = ((DATA_TYPE) i*(j+2) + 2) / n;
-	B[i][j] = ((DATA_TYPE) i*(j+3) + 3) / n;
-      }
+    {
+      X[i][j] = ((DATA_TYPE) i*(j+1) + 1) / n;
+      A[i][j] = ((DATA_TYPE) i*(j+2) + 2) / n;
+      B[i][j] = ((DATA_TYPE) i*(j+3) + 3) / n;
+    }
 }
 
 
@@ -41,7 +41,7 @@ void init_array (int n,
    Can be used also to check the correctness of the output. */
 static
 void print_array(int n,
-		 DATA_TYPE POLYBENCH_2D(X,N,N,n,n))
+                 DATA_TYPE POLYBENCH_2D(X,N,N,n,n))
 
 {
   int i, j;
@@ -59,53 +59,53 @@ void print_array(int n,
    including the call and return. */
 static
 void kernel_adi(int tsteps,
-		int n,
-		DATA_TYPE POLYBENCH_2D(X,N,N,n,n),
-		DATA_TYPE POLYBENCH_2D(A,N,N,n,n),
-		DATA_TYPE POLYBENCH_2D(B,N,N,n,n))
+                int n,
+                DATA_TYPE POLYBENCH_2D(X,N,N,n,n),
+                DATA_TYPE POLYBENCH_2D(A,N,N,n,n),
+                DATA_TYPE POLYBENCH_2D(B,N,N,n,n))
 {
   int t, i1, i2;
 
 #pragma autovec permute
   for (t = 0; t < _PB_TSTEPS; t++)
-    {
+  {
 #pragma autovec permute
-      for (i1 = 0; i1 < _PB_N; i1++)
+    for (i1 = 0; i1 < _PB_N; i1++)
 #pragma autovec permute
-	for (i2 = 1; i2 < _PB_N; i2++)
-	  {
-	    X[i1][i2] = X[i1][i2] - X[i1][i2-1] * A[i1][i2] / B[i1][i2-1];
-	    B[i1][i2] = B[i1][i2] - A[i1][i2] * A[i1][i2] / B[i1][i2-1];
-	  }
+      for (i2 = 1; i2 < _PB_N; i2++)
+      {
+        X[i1][i2] = X[i1][i2] - X[i1][i2-1] * A[i1][i2] / B[i1][i2-1];
+        B[i1][i2] = B[i1][i2] - A[i1][i2] * A[i1][i2] / B[i1][i2-1];
+      }
+
+
+    for (i1 = 0; i1 < _PB_N; i1++)
+      X[i1][_PB_N-1] = X[i1][_PB_N-1] / B[i1][_PB_N-1];
 
 #pragma autovec permute
-      for (i1 = 0; i1 < _PB_N; i1++)
-	X[i1][_PB_N-1] = X[i1][_PB_N-1] / B[i1][_PB_N-1];
+    for (i1 = 0; i1 < _PB_N; i1++)
+#pragma autovec permute
+      for (i2 = 0; i2 < _PB_N-2; i2++)
+        X[i1][_PB_N-i2-2] = (X[i1][_PB_N-2-i2] - X[i1][_PB_N-2-i2-1] * A[i1][_PB_N-i2-3]) / B[i1][_PB_N-3-i2];
 
 #pragma autovec permute
-      for (i1 = 0; i1 < _PB_N; i1++)
+    for (i1 = 1; i1 < _PB_N; i1++)
 #pragma autovec permute
-	for (i2 = 0; i2 < _PB_N-2; i2++)
-	  X[i1][_PB_N-i2-2] = (X[i1][_PB_N-2-i2] - X[i1][_PB_N-2-i2-1] * A[i1][_PB_N-i2-3]) / B[i1][_PB_N-3-i2];
+      for (i2 = 0; i2 < _PB_N; i2++) {
+        X[i1][i2] = X[i1][i2] - X[i1-1][i2] * A[i1][i2] / B[i1-1][i2];
+        B[i1][i2] = B[i1][i2] - A[i1][i2] * A[i1][i2] / B[i1-1][i2];
+      }
+
+#pragma simd vectorlength(8)
+    for (i2 = 0; i2 < _PB_N; i2++)
+      X[_PB_N-1][i2] = X[_PB_N-1][i2] / B[_PB_N-1][i2];
 
 #pragma autovec permute
-      for (i1 = 1; i1 < _PB_N; i1++)
-#pragma autovec permute
-	for (i2 = 0; i2 < _PB_N; i2++) {
-	  X[i1][i2] = X[i1][i2] - X[i1-1][i2] * A[i1][i2] / B[i1-1][i2];
-	  B[i1][i2] = B[i1][i2] - A[i1][i2] * A[i1][i2] / B[i1-1][i2];
-	}
-
+    for (i1 = 0; i1 < _PB_N-2; i1++)
 #pragma autovec permute
       for (i2 = 0; i2 < _PB_N; i2++)
-	X[_PB_N-1][i2] = X[_PB_N-1][i2] / B[_PB_N-1][i2];
-
-#pragma autovec permute
-      for (i1 = 0; i1 < _PB_N-2; i1++)
-#pragma autovec permute
-	for (i2 = 0; i2 < _PB_N; i2++)
-	  X[_PB_N-2-i1][i2] = (X[_PB_N-2-i1][i2] - X[_PB_N-i1-3][i2] * A[_PB_N-3-i1][i2]) / B[_PB_N-2-i1][i2];
-    }
+        X[_PB_N-2-i1][i2] = (X[_PB_N-2-i1][i2] - X[_PB_N-i1-3][i2] * A[_PB_N-3-i1][i2]) / B[_PB_N-2-i1][i2];
+  }
 }
 
 
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 
   /* Run kernel. */
   kernel_adi (tsteps, n, POLYBENCH_ARRAY(X),
-	      POLYBENCH_ARRAY(A), POLYBENCH_ARRAY(B));
+              POLYBENCH_ARRAY(A), POLYBENCH_ARRAY(B));
 
   /* Stop and print timer. */
   polybench_stop_instruments;

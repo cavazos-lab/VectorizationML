@@ -99,9 +99,8 @@ void kernel_gemver(int n,
     for (j = 0; j < _PB_N; j++)
       x[i] = x[i] + beta * A[j][i] * y[j];
 
-#pragma autovec permute
+#pragma simd vectorlength(8)
   for (i = 0; i < _PB_N; i++)
-#pragma autovec permute
     x[i] = x[i] + z[i];
 
 #pragma autovec permute

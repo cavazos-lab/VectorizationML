@@ -76,15 +76,15 @@ void kernel_bicg(int nx, int ny,
     s[i] = 0;
 #pragma autovec permute
   for (i = 0; i < _PB_NX; i++)
-    {
-      q[i] = 0;
+  {
+    q[i] = 0;
 #pragma autovec permute
-      for (j = 0; j < _PB_NY; j++)
-	{
-	  s[j] = s[j] + r[i] * A[i][j];
-	  q[i] = q[i] + A[i][j] * p[j];
-	}
+    for (j = 0; j < _PB_NY; j++)
+    {
+      s[j] = s[j] + r[i] * A[i][j];
+      q[i] = q[i] + A[i][j] * p[j];
     }
+  }
 }
 
 

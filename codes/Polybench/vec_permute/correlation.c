@@ -21,9 +21,9 @@
 /* Array initialization. */
 static
 void init_array (int m,
-		 int n,
-		 DATA_TYPE *float_n,
-		 DATA_TYPE POLYBENCH_2D(data,M,N,m,n))
+                 int n,
+                 DATA_TYPE *float_n,
+                 DATA_TYPE POLYBENCH_2D(data,M,N,m,n))
 {
   int i, j;
 
@@ -39,7 +39,7 @@ void init_array (int m,
    Can be used also to check the correctness of the output. */
 static
 void print_array(int m,
-		 DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m))
+                 DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m))
 
 {
   int i, j;
@@ -57,11 +57,11 @@ void print_array(int m,
    including the call and return. */
 static
 void kernel_correlation(int m, int n,
-			DATA_TYPE float_n,
-			DATA_TYPE POLYBENCH_2D(data,M,N,m,n),
-			DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m),
-			DATA_TYPE POLYBENCH_1D(mean,M,m),
-			DATA_TYPE POLYBENCH_1D(stddev,M,m))
+                        DATA_TYPE float_n,
+                        DATA_TYPE POLYBENCH_2D(data,M,N,m,n),
+                        DATA_TYPE POLYBENCH_2D(symmat,M,M,m,m),
+                        DATA_TYPE POLYBENCH_1D(mean,M,m),
+                        DATA_TYPE POLYBENCH_1D(stddev,M,m))
 {
   int i, j, j1, j2;
 
@@ -76,9 +76,9 @@ void kernel_correlation(int m, int n,
     mean[j] = 0.0;
 #pragma autovec permute
     for (i = 0; i < _PB_N; i++)
-	mean[j] += data[i][j];
-      mean[j] /= float_n;
-    }
+      mean[j] += data[i][j];
+    mean[j] /= float_n;
+  }
 
   /* Determine standard deviations of column vectors of data matrix. */
 #pragma autovec permute
@@ -146,10 +146,10 @@ int main(int argc, char** argv)
 
   /* Run kernel. */
   kernel_correlation (m, n, float_n,
-		      POLYBENCH_ARRAY(data),
-		      POLYBENCH_ARRAY(symmat),
-		      POLYBENCH_ARRAY(mean),
-		      POLYBENCH_ARRAY(stddev));
+                      POLYBENCH_ARRAY(data),
+                      POLYBENCH_ARRAY(symmat),
+                      POLYBENCH_ARRAY(mean),
+                      POLYBENCH_ARRAY(stddev));
 
   /* Stop and print timer. */
   polybench_stop_instruments;
