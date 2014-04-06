@@ -36,14 +36,17 @@ function compile {
     ($COMP $COMPFLAGS common/polybench.c -c -o $EXECDIR/polybench.o 2>&1) > /dev/null
     for file in $(find $GENDIR -name "*$1*.c")
     do
-      obj=$(echo $file | sed "s/$GENDIR/$EXECDIR/;s/c$/o/;s/\.c_/_/")
+	obj=$(echo $file | sed "s/$GENDIR/$EXECDIR/;s/c$/o/;s/\.c_/_/")
 	log=$(echo $obj | sed "s/$EXECDIR/$LOGDIR/;s/o$/log/")
 	dir=$(dirname $obj)
 	logdir=$(dirname $log)
 	mkdir -p $dir
 	mkdir -p $logdir
-	echo "$file -> $obj"
-	($COMP $COMPFLAGS -c $file -o $obj 2>&1) > $log
+	if [ ! -f $obj ]
+	then
+	    echo "$file -> $obj"
+	    ($COMP $COMPFLAGS -c $file -o $obj 2>&1) > $log
+	fi
     done
 }
 
@@ -51,8 +54,11 @@ function link {
     for obj in $(find $EXECDIR -name "*$1*.o")
     do
 	bin=$(echo $obj | sed 's/o$/exe/')
-	echo "$obj -> $bin"
-	$COMP $COMPFLAGS $obj $EXECDIR/polybench.o -o $bin
+	if [ ! -f $bin ]
+	then
+	    echo "$obj -> $bin"
+	    $COMP $COMPFLAGS $obj $EXECDIR/polybench.o -o $bin
+	fi
     done
 }
 
