@@ -15,7 +15,7 @@
 
 /* Include benchmark-specific header. */
 /* Default data type is double, default size is 1024. */
-#include "lu.h"
+#include "lu-bench.h"
 
 
 /* Array initialization. */
