@@ -33,10 +33,10 @@ function generate {
 
 function compile {
     mkdir -p $EXECDIR
-    $COMP $COMPFLAGS common/polybench.c -c -o $EXECDIR/polybench.o 2>&1 > /dev/null
+    ($COMP $COMPFLAGS common/polybench.c -c -o $EXECDIR/polybench.o 2>&1) > /dev/null
     for file in $(find $GENDIR -name "*$1*.c")
     do
-	obj=$(echo $file | sed "s/$GENDIR/$EXECDIR/;s/c$/o/;s/\.c_/_/")
+      obj=$(echo $file | sed "s/$GENDIR/$EXECDIR/;s/c$/o/;s/\.c_/_/")
 	log=$(echo $obj | sed "s/$EXECDIR/$LOGDIR/;s/o$/log/")
 	dir=$(dirname $obj)
 	logdir=$(dirname $log)
