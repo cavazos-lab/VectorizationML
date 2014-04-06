@@ -30,7 +30,8 @@ file=$1
 shift
 rest="$@"
 
-if [[ -z "$rest" ]]; then
+if [[ -z "$rest" ]]
+then
     # determine number of loops from file
     permute_count=$(grep -c '#pragma autovec permute' $file)
     # number of unique options
@@ -69,23 +70,26 @@ else
 	    do
 		newline=$line
 
-		extension=${file#*.}
+		extension=.${file#*.}
 		IFS_BAK=$IFS
 		IFS=','
 		newfile=$file
 		
 		for j in $i
 		do
-		    newline=$(echo $newline | sed "s/0/$j/")
+		    newline=$(echo $newline | sed "s/0/$j/;s/ /,/g")
 		done
-		for i in $newline
+		
+		for k in $newline
 		do
-		    newfile+="_${plabels[$((j - 1))]}"
+		    m=$((k - 1));
+		    newfile+="_${plabels[$((k - 1))]}"
 		done
 		newfile+="$extension"
 		IFS=$IFS_BAK
 		if [[ ! -f $newfile ]]
 		then
+		    echo " > $newfile"
 		    permute_program -v d=',' -v str=${newline} $file > $newfile
 		fi
 	    done
