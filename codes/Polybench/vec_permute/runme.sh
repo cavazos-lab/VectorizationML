@@ -42,11 +42,8 @@ function compile {
 	logdir=$(dirname $log)
 	mkdir -p $dir
 	mkdir -p $logdir
-	if [ ! -f $obj ]
-	then
-	    echo "$file -> $obj"
-	    ($COMP $COMPFLAGS -c $file -o $obj 2>&1) > $log
-	fi
+	echo "$file -> $obj"
+	($COMP $COMPFLAGS -c $file -o $obj 2>&1) > $log
     done
 }
 
@@ -54,11 +51,8 @@ function link {
     for obj in $(find $EXECDIR -name "*$1*.o")
     do
 	bin=$(echo $obj | sed 's/o$/exe/')
-	if [ ! -f $bin ]
-	then
-	    echo "$obj -> $bin"
-	    $COMP $COMPFLAGS $obj $EXECDIR/polybench.o -o $bin
-	fi
+	echo "$obj -> $bin"
+	$COMP $COMPFLAGS $obj $EXECDIR/polybench.o -o $bin
     done
 }
 

@@ -1,5 +1,8 @@
-file=$(mktemp)
-cat <<EOF > $file
+# short runs
+while read line
+do
+    ./runme.sh -gcrovi $line
+done <<EOF
 gesummv 2
 trisolv 2
 trmm 3
@@ -17,6 +20,13 @@ syr2k 2 3
 syrk 2 3
 2mm 3 3
 dynprog 3 3
+EOF
+
+# medium runs
+while read line
+do
+     ./runme.sh -gcrovi $line
+done <<EOF
 atax 1 2 1
 cholesky 1 1 2
 durbin 2 1 1
@@ -30,26 +40,12 @@ ludcmp 5 2 2
 reg_detect 4 3 2
 EOF
 
-for i in $(cat $file);do
-     ./runme.sh -g $i
-done
-
-for i in $(cat $file);do
-    ./runme.sh -c $i
-done
-
-for i in $(cat $file);do
-    ./runme.sh -rovi $i
-done
-
 # long runs
-cat <<EOF > $file
+while read line
+do
+     ./runme.sh -gcrovi $line
+done <<EOF
 correlation 2 2 2 3
 adi 3 2 2 2  
 EOF
 
-for i in $(cat $file);do
-    ./runme.sh -gcrovi $i
-done
-
-rm $file
