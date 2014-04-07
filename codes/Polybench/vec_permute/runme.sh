@@ -80,9 +80,9 @@ function output {
     mkdir -p $OUTDIR
     args="$@"
     pattern="Time(Sec)"
-    for i in $1*.c
+    for i in $TIMEDIR/$1*.log
     do
-	benchmark=$(basename $i .c)
+	benchmark=$(basename $i .log)
 	echo "[c] $OUTDIR/$benchmark.out"
 	sort -n -k2 -t, $TIMEDIR/$benchmark.log > $OUTDIR/$benchmark.out
     done
@@ -91,7 +91,7 @@ function output {
 
 function csv {
     mkdir -p $CSVDIR
-    for out in $OUTDIR/*$1*.out
+    for out in $OUTDIR/$1*.out
     do
 	line=$(< $out grep -e '^N\(_N\)\{1,\},')
 	def_time=$(echo "$line" | cut -d, -f2)
@@ -101,7 +101,6 @@ function csv {
 	(
 	    for line in $(cat $out)
             do
-		bench=$(echo "$line" | cut -d, -f1)
 		time=$(echo "$line" | cut -d, -f2)
 		time=$(echo $time | bc -l)
 		if [[ -z "$time" || "$time" = "0" ]]
@@ -110,7 +109,7 @@ function csv {
 		else
 		    speedup=$(echo "$def_time / $time" | bc -l)
 		fi
-		echo "$bench,$speedup,1"
+		echo $line | sed "s/$time/$speedup,1/"
 	    done
 	) | sort -n -k3 -t, -s -r > $outfile
     done
@@ -121,10 +120,13 @@ function img {
     for file in $CSVDIR/$1*.csv
     do
 	title=$(basename $file .csv)
-	size=$(echo "$(< $file wc -l)/6 + 1" | bc)
+	count=$(< $file wc -l)
+	#size=$(echo "($count)/8 + 2*l($count)" | bc -l)
+	wsize=$(echo "$count/20" | bc -l)
+	hsize=1
 	out=$IMGDIR/$title.eps
-        echo "$file -> $out"
-	gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$size'" generate.gnuplot
+        echo "$file -> $out ($wsize x $hsize)"
+	gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$wsize';graphHeight='$hsize'" generate.gnuplot
     done
 }
 

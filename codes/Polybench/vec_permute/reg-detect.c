@@ -15,7 +15,7 @@
 
 /* Include benchmark-specific header. */
 /* Default data type is int, default size is 50. */
-#include "reg_detect.h"
+#include "reg-detect.h"
 
 
 /* Array initialization. */

@@ -1,15 +1,15 @@
 reset
 
-set terminal postscript eps size graphWidth,6
+set terminal postscript eps linewidth 0.25 rounded size graphWidth,graphHeight "Helvetica,2.5"
 
 set output graphOutput
 
 set title graphTitle
 
-fontsize = 8
+
 set xtics rotate by -90
-set xlabel "Benchmarks" font "Helvetica"
-set ylabel "Speedup Over Default" font "Helvetica"
+set xlabel "Benchmarks"
+set ylabel "Speedup Over Default"
 set logscale y
 
 set datafile separator ","
