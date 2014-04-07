@@ -157,8 +157,8 @@ function summary {
 
     out=summary.eps
     title="Summary"
-    size=$(echo "$(< $file wc -l)/10 + 1" | bc)
-    gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$size'" generate.gnuplot
+    size=$(echo "$(< $file wc -l)/20" | bc)
+    gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$size';graphHeight='1'" generate.gnuplot
     GS_OPTIONS=-dAutoRotatePages=/None epstopdf $out
     echo "Generated $file, $out, and summary.pdf"
 }
