@@ -123,7 +123,7 @@ void kernel_correlation(int m, int n,
   }
   symmat[_PB_M-1][_PB_M-1] = 1.0;
 }
-za
+
 
 int main(int argc, char** argv)
 {

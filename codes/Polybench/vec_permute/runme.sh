@@ -42,7 +42,7 @@ function compile {
 	logdir=$(dirname $log)
 	mkdir -p $dir
 	mkdir -p $logdir
-	echo "$file -> $obj"
+	echo "$file -> $obj (logging to $log)"
 	($COMP $COMPFLAGS -c $file -o $obj 2>&1) > $log
     done
 }
@@ -122,7 +122,7 @@ function img {
 	title=$(basename $file .csv)
 	count=$(< $file wc -l)
 	#size=$(echo "($count)/8 + 2*l($count)" | bc -l)
-	wsize=$(echo "$count/20" | bc -l)
+	wsize=$(echo "$count/40 + 0.5" | bc -l)
 	hsize=1
 	out=$IMGDIR/$title.eps
         echo "$file -> $out ($wsize x $hsize)"
