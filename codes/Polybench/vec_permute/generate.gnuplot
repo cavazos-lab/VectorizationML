@@ -1,6 +1,6 @@
 reset
 
-set terminal postscript eps linewidth 0.25 rounded size graphWidth,graphHeight "Helvetica,2.5"
+set terminal postscript eps linewidth 0.25 rounded size graphWidth,graphHeight "Helvetica,8"
 
 set output graphOutput
 

@@ -121,12 +121,17 @@ function img {
     do
 	title=$(basename $file .csv)
 	count=$(< $file wc -l)
-	#size=$(echo "($count)/8 + 2*l($count)" | bc -l)
-	wsize=$(echo "$count/40 + 0.5" | bc -l)
-	hsize=1
+	if [[ $count -gt 300 ]]; then
+	    count=300
+	fi
+	wsize=$(echo "$count/10 + 0.5" | bc -l)
+	hsize=3
 	out=$IMGDIR/$title.eps
+	tmpfile=$(mktemp)
+	head -n $count $file > $tmpfile
         echo "$file -> $out ($wsize x $hsize)"
-	gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$wsize';graphHeight='$hsize'" generate.gnuplot
+	gnuplot -e "filename='$tmpfile';graphTitle='$title';graphOutput='$out';graphWidth='$wsize';graphHeight='$hsize'" generate.gnuplot
+	rm $tmpfile
     done
 }
 
@@ -141,10 +146,6 @@ function summary {
 	done
     ) > $file
     count=$(< $file wc -l)
-
-    #tmp=$(mktemp)
-    #sort -n -s -r -t, -k2 $file > $tmp
-    #mv $tmp $file
     
     form=$(cut -d, -f2 $file | paste -sd '+')
     echo "A-MEAN,$(echo "($form)/$count" | bc -l),0" >> $file
@@ -157,8 +158,9 @@ function summary {
 
     out=summary.eps
     title="Summary"
-    size=$(echo "$(< $file wc -l)/20" | bc)
-    gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$size';graphHeight='1'" generate.gnuplot
+    size=$(echo "$(< $file wc -l)/10 + 0.8" | bc)
+    hsize=3
+    gnuplot -e "filename='$file';graphTitle='$title';graphOutput='$out';graphWidth='$size';graphHeight='3'" generate.gnuplot
     GS_OPTIONS=-dAutoRotatePages=/None epstopdf $out
     echo "Generated $file, $out, and summary.pdf"
 }
