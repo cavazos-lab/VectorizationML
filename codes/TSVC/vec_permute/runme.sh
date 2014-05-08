@@ -232,7 +232,7 @@ IMG=0
 PDF=0
 SUM=0
 HELP=0
-args=$(getopt "agcrovisp" "$@")
+args=$(getopt "agcrovisph" "$@")
 eval set -- "$args"
 while [ $# -ge 1 ]; do
     case "$1" in
