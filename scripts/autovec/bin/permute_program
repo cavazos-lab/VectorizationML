@@ -1,4 +1,4 @@
-#!/usr/bin/env awk -f
+#!/bin/awk -f
 
 # William Killian
 # University of Delaware
